@@ -37,20 +37,30 @@ pull_uboot(){
 		echo "pull buildroot ok"
 	fi
 }
+# pull_linux(){
+# 	rm -rf ${temp_root_dir}/${linux_dir} &&\
+# 	mkdir -p ${temp_root_dir}/${linux_dir} &&\
+# 	cd ${temp_root_dir}/${linux_dir} &&\
+# 	#git clone --depth=1 -b nano-4.14-exp https://github.com/Lichee-Pi/linux.git
+# 	git clone -b f1c100s --depth=1 https://github.com/Icenowy/linux.git
+# 	if [ ! -d ${temp_root_dir}/${linux_dir}/linux ]; then
+# 		echo "Error:pull linux failed"
+#     		exit 0
+# 	else
+# 		mv ${temp_root_dir}/${linux_dir}/linux/* ${temp_root_dir}/${linux_dir}/
+# 		rm -rf ${temp_root_dir}/${linux_dir}/linux
+# 		echo "pull buildroot ok"
+# 	fi
+# }
 pull_linux(){
-	rm -rf ${temp_root_dir}/${linux_dir} &&\
-	mkdir -p ${temp_root_dir}/${linux_dir} &&\
-	cd ${temp_root_dir}/${linux_dir} &&\
-	#git clone --depth=1 -b nano-4.14-exp https://github.com/Lichee-Pi/linux.git
-	git clone -b f1c100s --depth=1 https://github.com/Icenowy/linux.git
-	if [ ! -d ${temp_root_dir}/${linux_dir}/linux ]; then
-		echo "Error:pull linux failed"
-    		exit 0
-	else	
-		mv ${temp_root_dir}/${linux_dir}/linux/* ${temp_root_dir}/${linux_dir}/
-		rm -rf ${temp_root_dir}/${linux_dir}/linux
-		echo "pull buildroot ok"
-	fi
+	rm -rf ${temp_root_dir}/${linux_dir} 
+	wget https://github.com/Lichee-Pi/linux/archive/nano-5.2-tf.zip 
+	unzip ~/nano-5.2-tf.zip 
+	mv linux-nano-5.2-tf ${linux_dir} 
+	cd ${linux_dir} 
+	patch -p1 < ${temp_root_dir}/usb.patch 
+	cp ${temp_root_dir}/suniv-f1c100s-licheepi-nano-with-lcd.dtb ${temp_root_dir}/${linux_dir}/arch/arm/boot/dts
+	echo "pull linux ok"
 }
 pull_toolchain(){
 	rm -rf ${temp_root_dir}/${toolchain_dir}
@@ -64,7 +74,7 @@ pull_toolchain(){
                         echo "Error:pull toolchain failed"
                         exit 0
                 else
-                        echo "pull buildroot ok"
+                        echo "pull toolchain ok"
                 fi
         else
                 wget https://releases.linaro.org/components/toolchain/binaries/7.4-2019.02/arm-linux-gnueabi/gcc-linaro-7.4.1-2019.02-i686_arm-linux-gnueabi.tar.xz &&\
@@ -73,7 +83,7 @@ pull_toolchain(){
                         echo "Error:pull toolchain failed"
                         exit 0
                 else
-                        echo "pull buildroot ok"
+                        echo "pull toolchain ok"
                 fi
         fi
 }
@@ -226,6 +236,9 @@ build_linux(){
 		#fi
         	exit 1
 	fi
+
+        #JEM
+        cp ${temp_root_dir}/${linux_dir}/arch/arm/boot/dts/suniv-f1c100s-licheepi-nano.dtb ${temp_root_dir}/${linux_dir}/arch/arm/boot/dts/suniv-f1c100s-licheepi-nano-with-lcd.dtb
 
 	if [ ! -f ${temp_root_dir}/${linux_dir}/arch/arm/boot/dts/suniv-f1c100s-licheepi-nano-with-lcd.dtb ]; then
         	echo "Error: UBOOT NOT BUILD.${temp_root_dir}/${linux_dir}/arch/arm/boot/dts/suniv-f1c100s-licheepi-nano-with-lcd.dtb not found"
