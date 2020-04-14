@@ -303,6 +303,9 @@ build_buildroot(){
         	exit 1
 	fi
 
+	# Add custom init scripts
+	cp ${temp_root_dir}/scripts/S* ${temp_root_dir}/buildroot/${buildroot_dir}/output/target/etc/init.d
+	
 	if [ -x ${temp_root_dir}/../post-buildroot.sh ]; then
 		echo "Running Post Buildroot script"
 		${temp_root_dir}/../post-buildroot.sh "${temp_root_dir}/buildroot/${buildroot_dir}/output"
