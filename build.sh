@@ -1,5 +1,7 @@
-
 #!/bin/bash
+
+#TODO Add step to download balena-cli
+#TODO add argument for drive path to flash_tf
 
 echo "Welcome to use lichee pi one key package"
 toolchain_dir="toolchain"
@@ -37,31 +39,32 @@ pull_uboot(){
 		echo "pull buildroot ok"
 	fi
 }
-# pull_linux(){
-# 	rm -rf ${temp_root_dir}/${linux_dir} &&\
-# 	mkdir -p ${temp_root_dir}/${linux_dir} &&\
-# 	cd ${temp_root_dir}/${linux_dir} &&\
-# 	#git clone --depth=1 -b nano-4.14-exp https://github.com/Lichee-Pi/linux.git
-# 	git clone -b f1c100s --depth=1 https://github.com/Icenowy/linux.git
-# 	if [ ! -d ${temp_root_dir}/${linux_dir}/linux ]; then
-# 		echo "Error:pull linux failed"
-#     		exit 0
-# 	else
-# 		mv ${temp_root_dir}/${linux_dir}/linux/* ${temp_root_dir}/${linux_dir}/
-# 		rm -rf ${temp_root_dir}/${linux_dir}/linux
-# 		echo "pull buildroot ok"
-# 	fi
-# }
 pull_linux(){
-	rm -rf ${temp_root_dir}/${linux_dir} 
-	wget https://github.com/Lichee-Pi/linux/archive/nano-5.2-tf.zip 
-	unzip ~/nano-5.2-tf.zip 
-	mv linux-nano-5.2-tf ${linux_dir} 
-	cd ${linux_dir} 
-	patch -p1 < ${temp_root_dir}/usb.patch 
-	cp ${temp_root_dir}/suniv-f1c100s-licheepi-nano-with-lcd.dtb ${temp_root_dir}/${linux_dir}/arch/arm/boot/dts
-	echo "pull linux ok"
+ 	rm -rf ${temp_root_dir}/${linux_dir} &&\
+	mkdir -p ${temp_root_dir}/${linux_dir} &&\
+	cd ${temp_root_dir}/${linux_dir} &&\
+	git clone --depth=1 -b nano-5.2-tf https://github.com/Lichee-Pi/linux.git
+	#git clone -b f1c100s --depth=1 https://github.com/Icenowy/linux.git
+	if [ ! -d ${temp_root_dir}/${linux_dir}/linux ]; then
+		echo "Error:pull linux failed"
+    		exit 0
+	else
+		mv ${temp_root_dir}/${linux_dir}/linux/* ${temp_root_dir}/${linux_dir}/
+		rm -rf ${temp_root_dir}/${linux_dir}/linux
+		cp ${temp_root_dir}/suniv-f1c100s-licheepi-nano-with-lcd.dtb ${temp_root_dir}/${linux_dir}/arch/arm/boot/dts
+		echo "pull buildroot ok"
+	fi
 }
+#pull_linux(){
+#	rm -rf ${temp_root_dir}/${linux_dir} 
+#	wget https://github.com/Lichee-Pi/linux/archive/nano-5.2-tf.zip 
+#	unzip ~/nano-5.2-tf.zip 
+#	mv linux-nano-5.2-tf ${linux_dir} 
+#	cd ${linux_dir} 
+#	patch -p1 < ${temp_root_dir}/usb.patch 
+#	cp ${temp_root_dir}/suniv-f1c100s-licheepi-nano-with-lcd.dtb ${temp_root_dir}/${linux_dir}/arch/arm/boot/dts
+#	echo "pull linux ok"
+#}
 pull_toolchain(){
 	rm -rf ${temp_root_dir}/${toolchain_dir}
 	mkdir -p ${temp_root_dir}/${toolchain_dir}
@@ -88,12 +91,12 @@ pull_toolchain(){
         fi
 }
 pull_buildroot(){
-	rm -rf ${temp_root_dir}/${buildroot_dir}
-	mkdir -p ${temp_root_dir}/${buildroot_dir}
-	cd ${temp_root_dir}/${buildroot_dir}  &&\
-	wget https://buildroot.org/downloads/buildroot-2017.08.tar.gz &&\
-	tar xvf buildroot-2017.08.tar.gz
-	if [ ! -d ${temp_root_dir}/${buildroot_dir}/buildroot-2017.08 ]; then
+	rm -rf ${temp_root_dir}/buildroot
+	mkdir -p ${temp_root_dir}/buildroot
+	cd ${temp_root_dir}/buildroot
+	wget https://buildroot.org/downloads/buildroot-2017.11.1.tar.gz &&\
+	tar xvf buildroot-2017.11.1.tar.gz
+	if [ ! -d ${temp_root_dir}/buildroot/${buildroot_dir}]; then
 		echo "Error:pull buildroot failed"
     		exit 0
 	else			
@@ -108,13 +111,17 @@ pull_all(){
         sudo apt-get install -y make gcc g++ swig python-dev bc python u-boot-tools bison flex bc libssl-dev libncurses5-dev unzip mtd-utils
 	sudo apt-get install -y libc6-i386 lib32stdc++6 lib32z1
 	sudo apt-get install -y libc6:i386 libstdc++6:i386 zlib1g:i386
+	sudo apt-get install -y build-essential libreadline-dev libffi-dev git pkg-config libsdl2-2.0-0 libsdl2-dev python
+	sudo apt-get install -y texinfo
+
 	pull_uboot
 	pull_linux
 	pull_toolchain
 	pull_buildroot
-	cp -f ${temp_root_dir}/buildroot.config ${temp_root_dir}/${buildroot_dir}/buildroot-2017.08
+	cp -f ${temp_root_dir}/buildroot.config ${temp_root_dir}/buildroot/${buildroot_dir}
 	cp -f ${temp_root_dir}/linux-licheepi_nano_defconfig ${temp_root_dir}/${linux_dir}/arch/arm/configs/licheepi_nano_defconfig
 	cp -f ${temp_root_dir}/linux-licheepi_nano_spiflash_defconfig ${temp_root_dir}/${linux_dir}/arch/arm/configs/licheepi_nano_spiflash_defconfig
+	cp -f ${temp_root_dir}/linux-suniv-f1c100s.dtsi/suniv-f1c100s.dtsi
 	cp -f ${temp_root_dir}/linux-suniv-f1c100s-licheepi-nano-with-lcd.dts ${temp_root_dir}/${linux_dir}/arch/arm/boot/dts/suniv-f1c100s-licheepi-nano-with-lcd.dts
 	cp -f ${temp_root_dir}/uboot-licheepi_nano_defconfig ${temp_root_dir}/${u_boot_dir}/configs/licheepi_nano_defconfig
 	cp -f ${temp_root_dir}/uboot-licheepi_nano_spiflash_defconfig ${temp_root_dir}/${u_boot_dir}/configs/licheepi_nano_spiflash_defconfig
@@ -140,7 +147,7 @@ update_env(){
 check_env(){
 	if [ ! -d ${temp_root_dir}/${toolchain_dir} ] ||\
 	 [ ! -d ${temp_root_dir}/${u_boot_dir} ] ||\
-	 [ ! -d ${temp_root_dir}/${buildroot_dir} ] ||\
+	 [ ! -d ${temp_root_dir}/buildroot ] ||\
 	 [ ! -d ${temp_root_dir}/${linux_dir} ]; then
 		echo "Error:env error,Please use ./buid.sh pull_all"
 		exit 0
@@ -176,6 +183,9 @@ build_uboot(){
     	echo "--->Configuring ..."
 	make ARCH=arm CROSS_COMPILE=${cross_compiler}- ${u_boot_config_file} > /dev/null 2>&1
         # cp -f ${temp_root_dir}/${u_boot_config_file} ${temp_root_dir}/${u_boot_dir}/.config
+	if [ $? -ne 0 ]; then
+		exit 1
+	fi
 	if [ $? -ne 0 ] || [ ! -f ${temp_root_dir}/${u_boot_dir}/.config ]; then
 		echo "Error: .config file not exist"
 		exit 1
@@ -218,7 +228,8 @@ build_linux(){
 	cd ${temp_root_dir}/${linux_dir}
 	echo "Building linux ..."
     	echo "--->Configuring ..."
-	make ARCH=arm CROSS_COMPILE=${cross_compiler}- ${linux_config_file} > /dev/null 2>&1
+	#make ARCH=arm CROSS_COMPILE=${cross_compiler}- ${linux_config_file} > /dev/null 2>&1
+	make ARCH=arm CROSS_COMPILE=${cross_compiler}- ${linux_config_file}  2>&1
 	if [ $? -ne 0 ] || [ ! -f ${temp_root_dir}/${linux_dir}/.config ]; then
 		echo "Error: .config file not exist"
 		exit 1
@@ -244,10 +255,21 @@ build_linux(){
         	echo "Error: UBOOT NOT BUILD.${temp_root_dir}/${linux_dir}/arch/arm/boot/dts/suniv-f1c100s-licheepi-nano-with-lcd.dtb not found"
         	exit 1
 	fi
+
 	#build linux kernel modules
 	make ARCH=arm CROSS_COMPILE=${cross_compiler}- -j${proc_processor} INSTALL_MOD_PATH=${temp_root_dir}/${linux_dir}/mod_output modules > /dev/null 2>&1
+	if [ $? -ne 0 ]; then
+		echo "Error: problem making modules"
+		exit 1
+	fi
+
 	make ARCH=arm CROSS_COMPILE=${cross_compiler}- -j${proc_processor} INSTALL_MOD_PATH=${temp_root_dir}/${linux_dir}/mod_output modules_install > /dev/null 2>&1
 	
+	if [ $? -ne 0 ]; then
+		echo "Error: problem installing  modules"
+		exit 1
+	fi
+
 	echo "Build linux ok"
 }
 #linux=========================================================
@@ -255,31 +277,40 @@ build_linux(){
 #linux=========================================================
 
 clean_buildroot(){
-	cd ${temp_root_dir}/${buildroot_dir}
+	cd ${temp_root_dir}/buildroot/${buildroot_dir}
 	make ARCH=arm CROSS_COMPILE=${cross_compiler}- clean > /dev/null 2>&1
 }
 
 
 build_buildroot(){
-	cd ${temp_root_dir}/${buildroot_dir}/buildroot-2017.08
+	cd ${temp_root_dir}/buildroot/${buildroot_dir}
 	echo "Building buildroot ..."
     	echo "--->Configuring ..."
-	rm ${temp_root_dir}/${buildroot_dir}/buildroot-2017.08/.config
+	rm ${temp_root_dir}/buildroot/${buildroot_dir}/.config
 	make ARCH=arm CROSS_COMPILE=${cross_compiler}- defconfig
-	cp -f ${temp_root_dir}/buildroot.config ${temp_root_dir}/${buildroot_dir}/buildroot-2017.08/.config
-	make ARCH=arm CROSS_COMPILE=${cross_compiler}- ${temp_root_dir}/${buildroot_dir}/buildroot-2017.08/.config
+	cp -f ${temp_root_dir}/buildroot.config ${temp_root_dir}/buildroot/${buildroot_dir}/.config
+	make ARCH=arm CROSS_COMPILE=${cross_compiler}- ${temp_root_dir}/buildroot/${buildroot_dir}/.config
 	# make ARCH=arm CROSS_COMPILE=${cross_compiler}- ${buildroot_config_file} > /dev/null 2>&1
-	if [ $? -ne 0 ] || [ ! -f ${temp_root_dir}/${buildroot_dir}/buildroot-2017.08/.config ]; then
+	if [ $? -ne 0 ] || [ ! -f ${temp_root_dir}/buildroot/${buildroot_dir}/.config ]; then
 		echo "Error: .config file not exist"
 		exit 1
 	fi
 	echo "--->Compiling ..."
   	make ARCH=arm CROSS_COMPILE=${cross_compiler}- > ${temp_root_dir}/build_buildroot.log 2>&1
 
-	if [ $? -ne 0 ] || [ ! -d ${temp_root_dir}/${buildroot_dir}/buildroot-2017.08/output/target ]; then
+	if [ $? -ne 0 ] || [ ! -d ${temp_root_dir}/buildroot/${buildroot_dir}/output/target ]; then
         	echo "Error: BUILDROOT NOT BUILD.Please Get Some Error From build_buildroot.log"
         	exit 1
 	fi
+
+	if [ -x ${temp_root_dir}/../post-buildroot.sh ]; then
+		echo "Running Post Buildroot script"
+		${temp_root_dir}/../post-buildroot.sh "${temp_root_dir}/buildroot/${buildroot_dir}/output"
+		echo "Post Buildroot script done"
+	else
+		echo "No post buildroot script"
+	fi
+
 	echo "Build buildroot ok"
 }
 #linux=========================================================
@@ -296,8 +327,8 @@ copy_linux(){
 	
 }
 copy_buildroot(){
-	cp -r ${temp_root_dir}/${buildroot_dir}/buildroot-2017.08/output/target ${temp_root_dir}/output/rootfs/
-	cp ${temp_root_dir}/${buildroot_dir}/buildroot-2017.08/output/images/rootfs.tar ${temp_root_dir}/output/
+	cp -r ${temp_root_dir}/buildroot/${buildroot_dir}/output/target ${temp_root_dir}/output/rootfs/
+	cp ${temp_root_dir}/buildroot/${buildroot_dir}/output/images/rootfs.tar ${temp_root_dir}/output/
 	gzip -c ${temp_root_dir}/output/rootfs.tar > ${temp_root_dir}/output/rootfs.tar.gz
 }
 #copy=========================================================
@@ -459,6 +490,11 @@ build(){
 	
 	
 }
+flash_tf(){
+	sudo ${temp_root_dir}/balena-cli/balena local flash ~/Projects/Lichee/lichee-nano-one-key-package/output/image/lichee-nano-normal-size.img --drive /dev/sda
+}
+
+#
 if [ "${1}" = "" ] && [ ! "${1}" = "nano_spiflash" ] && [ ! "${1}" = "nano_tf" ] && [ ! "${1}" = "pull_all" ]; then
 	echo "Usage: build.sh [nano_spiflash | nano_tf | pull_all | clean]"；
 	echo "One key build nano finware";
@@ -505,6 +541,9 @@ if [ "${1}" = "nano_tf" ]; then
 	echo "the image file in output/image dir"
 fi
 
+if [ "${1}" = "flash_tf" ]; then
+	flash_tf
+fi
 sleep 1
 echo "build ok"
 
