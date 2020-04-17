@@ -55,6 +55,18 @@ pull_linux(){
 		echo "pull buildroot ok"
 	fi
 }
+pull_balena(){
+	wget https://github.com/balena-io/balena-cli/releases/download/v11.30.17/balena-cli-v11.30.17-linux-x64-standalone.zip
+	unzip balena-cli-v11.30.17-linux-x64-standalone.zip
+	if [ ! -d ${temp_root_dir}/balena-cli ]; then
+		echo "Error:pull balena-cli failed"
+    		exit 0
+	else
+		rm balena-cli-v11.30.17-linux-x64-standalone.zip
+		echo "pull balena-cli ok"
+	fi
+	
+}
 #pull_linux(){
 #	rm -rf ${temp_root_dir}/${linux_dir} 
 #	wget https://github.com/Lichee-Pi/linux/archive/nano-5.2-tf.zip 
@@ -285,7 +297,7 @@ clean_buildroot(){
 build_buildroot(){
 	cd ${temp_root_dir}/buildroot/${buildroot_dir}
 	echo "Building buildroot ..."
-    	echo "--->Configuring ..."
+	    	echo "--->Configuring ..."
 	rm ${temp_root_dir}/buildroot/${buildroot_dir}/.config
 	make ARCH=arm CROSS_COMPILE=${cross_compiler}- defconfig
 	cp -f ${temp_root_dir}/buildroot.config ${temp_root_dir}/buildroot/${buildroot_dir}/.config
@@ -296,15 +308,16 @@ build_buildroot(){
 		exit 1
 	fi
 	echo "--->Compiling ..."
-  	make ARCH=arm CROSS_COMPILE=${cross_compiler}- > ${temp_root_dir}/build_buildroot.log 2>&1
+	  	make ARCH=arm CROSS_COMPILE=${cross_compiler}- > ${temp_root_dir}/build_buildroot.log 2>&1
 
 	if [ $? -ne 0 ] || [ ! -d ${temp_root_dir}/buildroot/${buildroot_dir}/output/target ]; then
-        	echo "Error: BUILDROOT NOT BUILD.Please Get Some Error From build_buildroot.log"
-        	exit 1
+	        	echo "Error: BUILDROOT NOT BUILD.Please Get Some Error From build_buildroot.log"
+	        	exit 1
 	fi
 
 	# Add custom init scripts
-	cp ${temp_root_dir}/scripts/S* ${temp_root_dir}/buildroot/${buildroot_dir}/output/target/etc/init.d
+	echo "Adding custom scripts"
+	cp -v ${temp_root_dir}/scripts/S* ${temp_root_dir}/buildroot/${buildroot_dir}/output/target/etc/init.d
 	
 	if [ -x ${temp_root_dir}/../post-buildroot.sh ]; then
 		echo "Running Post Buildroot script"
@@ -494,16 +507,17 @@ build(){
 	
 }
 flash_tf(){
-	sudo ${temp_root_dir}/balena-cli/balena local flash ~/Projects/Lichee/lichee-nano-one-key-package/output/image/lichee-nano-normal-size.img --drive /dev/sda
+	sudo ${temp_root_dir}/balena-cli/balena local flash ${temp_root_dir}/output/image/lichee-nano-normal-size.img --drive $1
 }
 
 #
-if [ "${1}" = "" ] && [ ! "${1}" = "nano_spiflash" ] && [ ! "${1}" = "nano_tf" ] && [ ! "${1}" = "pull_all" ]; then
+if [ "${1}" = "" ] && [ ! "${1}" = "nano_spiflash" ] && [ ! "${1}" = "nano_tf" ] && [ ! "${1}" = "pull_all" ] && [ ! "${1}" = "flash_tf" ]; then
 	echo "Usage: build.sh [nano_spiflash | nano_tf | pull_all | clean]"；
 	echo "One key build nano finware";
 	echo " ";
 	echo "nano_spiflash    Build nano firmware booted from spiflash";
 	echo "nano_tf          Build nano firmware booted from tf";
+	echo "flash_tf         Write nano firmware to tf [drive]";
 	echo "pull_all         Pull build env from internet";
 	echo "clean            Clean build env";
     exit 0
@@ -545,7 +559,11 @@ if [ "${1}" = "nano_tf" ]; then
 fi
 
 if [ "${1}" = "flash_tf" ]; then
-	flash_tf
+	if [ "${2}" = "" ]; then
+		echo "missing device name"
+		exit 1
+	fi
+	flash_tf "${2}"
 fi
 sleep 1
 echo "build ok"
