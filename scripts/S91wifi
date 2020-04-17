@@ -4,7 +4,7 @@
 #
 
 start() {
-        printf Network Setup..."
+        printf "Network Setup..."
 
 	# Load kmods
 	modprobe lib80211_crypt_ccmp.ko
@@ -12,7 +12,7 @@ start() {
 	modprobe lib80211.ko
 	modprobe r8188eu.ko
 
-	if grep -q nameserver /etc/resolv.confile.txt then
+	if grep -q nameserver /etc/resolv.confile.txt; then
 		echo Nameservers already exist
 	else
 		echo Adding Nameservers
