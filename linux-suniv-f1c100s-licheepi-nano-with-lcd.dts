@@ -109,6 +109,15 @@
     pinctrl-0 = <&spi0_pins_a>;
     status = "okay";
     spi-max-frequency = <50000000>;
+	spi0_0 {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		compatible = "spidev";
+
+		reg = <0>;
+		spi-max-frequency = <50000000>;
+	};
 /* JEM
 	xt25f128@0 {
 		#address-cells = <0x1>;
@@ -154,6 +163,16 @@
 	pinctrl-0 = <&spi1_pins_a>;
 	status = "okay";
 	spi-max-frequency = <50000000>;
+	spi1_0 {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		compatible = "spidev";
+
+		reg = <0>;
+		spi-max-frequency = <50000000>;
+	};
+
 };
 
 &i2c0 {
