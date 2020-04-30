@@ -55,6 +55,18 @@ pull_linux(){
 		echo "pull buildroot ok"
 	fi
 }
+pull_balena(){
+	wget https://github.com/balena-io/balena-cli/releases/download/v11.30.17/balena-cli-v11.30.17-linux-x64-standalone.zip
+	unzip balena-cli-v11.30.17-linux-x64-standalone.zip
+	if [ ! -d ${temp_root_dir}/balena-cli ]; then
+		echo "Error:pull balena-cli failed"
+    		exit 0
+	else
+		rm balena-cli-v11.30.17-linux-x64-standalone.zip
+		echo "pull balena-cli ok"
+	fi
+	
+}
 #pull_linux(){
 #	rm -rf ${temp_root_dir}/${linux_dir} 
 #	wget https://github.com/Lichee-Pi/linux/archive/nano-5.2-tf.zip 
@@ -113,6 +125,7 @@ pull_all(){
 	sudo apt-get install -y libc6:i386 libstdc++6:i386 zlib1g:i386
 	sudo apt-get install -y build-essential libreadline-dev libffi-dev git pkg-config libsdl2-2.0-0 libsdl2-dev python
 	sudo apt-get install -y texinfo
+	sudo apt-get install -y subversion
 
 	pull_uboot
 	pull_linux
@@ -285,7 +298,7 @@ clean_buildroot(){
 build_buildroot(){
 	cd ${temp_root_dir}/buildroot/${buildroot_dir}
 	echo "Building buildroot ..."
-    	echo "--->Configuring ..."
+	    	echo "--->Configuring ..."
 	rm ${temp_root_dir}/buildroot/${buildroot_dir}/.config
 	make ARCH=arm CROSS_COMPILE=${cross_compiler}- defconfig
 	cp -f ${temp_root_dir}/buildroot.config ${temp_root_dir}/buildroot/${buildroot_dir}/.config
@@ -296,15 +309,16 @@ build_buildroot(){
 		exit 1
 	fi
 	echo "--->Compiling ..."
-  	make ARCH=arm CROSS_COMPILE=${cross_compiler}- > ${temp_root_dir}/build_buildroot.log 2>&1
+	  	make ARCH=arm CROSS_COMPILE=${cross_compiler}- > ${temp_root_dir}/build_buildroot.log 2>&1
 
 	if [ $? -ne 0 ] || [ ! -d ${temp_root_dir}/buildroot/${buildroot_dir}/output/target ]; then
-        	echo "Error: BUILDROOT NOT BUILD.Please Get Some Error From build_buildroot.log"
-        	exit 1
+	        	echo "Error: BUILDROOT NOT BUILD.Please Get Some Error From build_buildroot.log"
+	        	exit 1
 	fi
 
 	# Add custom init scripts
-	cp ${temp_root_dir}/scripts/S* ${temp_root_dir}/buildroot/${buildroot_dir}/output/target/etc/init.d
+	echo "Adding custom scripts"
+	cp -v ${temp_root_dir}/scripts/S* ${temp_root_dir}/buildroot/${buildroot_dir}/output/target/etc/init.d
 	
 	if [ -x ${temp_root_dir}/../post-buildroot.sh ]; then
 		echo "Running Post Buildroot script"
@@ -494,16 +508,17 @@ build(){
 	
 }
 flash_tf(){
-	sudo ${temp_root_dir}/balena-cli/balena local flash ~/Projects/Lichee/lichee-nano-one-key-package/output/image/lichee-nano-normal-size.img --drive /dev/sda
+	sudo ${temp_root_dir}/balena-cli/balena local flash ${temp_root_dir}/output/image/lichee-nano-normal-size.img --drive $1
 }
 
 #
-if [ "${1}" = "" ] && [ ! "${1}" = "nano_spiflash" ] && [ ! "${1}" = "nano_tf" ] && [ ! "${1}" = "pull_all" ]; then
+if [ "${1}" = "" ] && [ ! "${1}" = "nano_spiflash" ] && [ ! "${1}" = "nano_tf" ] && [ ! "${1}" = "pull_all" ] && [ ! "${1}" = "flash_tf" ]; then
 	echo "Usage: build.sh [nano_spiflash | nano_tf | pull_all | clean]"；
 	echo "One key build nano finware";
 	echo " ";
 	echo "nano_spiflash    Build nano firmware booted from spiflash";
 	echo "nano_tf          Build nano firmware booted from tf";
+	echo "flash_tf         Write nano firmware to tf [drive]";
 	echo "pull_all         Pull build env from internet";
 	echo "clean            Clean build env";
     exit 0
@@ -545,8 +560,65 @@ if [ "${1}" = "nano_tf" ]; then
 fi
 
 if [ "${1}" = "flash_tf" ]; then
-	flash_tf
+	if [ "${2}" = "" ]; then
+		echo "missing device name"
+		exit 1
+	fi
+	flash_tf "${2}"
 fi
 sleep 1
 echo "build ok"
 
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          /* Include fragment for Sparc TSO operating systems.
+   Copyright (C) 2011-2016 Free Software Foundation, Inc.
+
+This file is part of GCC.
+
+GCC is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3, or (at your option)
+any later version.
+
+GCC is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GCC; see the file COPYING3.  If not see
+<http://www.gnu.org/licenses/>.  */
+
+
+/* This operating system sets PSTATE.MM to the TSO memory model.  */
+#undef SUBTARGET_DEFAULT_MEMORY_MODEL
+#define SUBTARGET_DEFAULT_MEMORY_MODEL	SMM_TSO
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     ;; Scheduling description for Alpha EV6.
+;;   Copyright (C) 2002-2016 Free Software Foundation, Inc.
+;;
+;; This file is part of GCC.
+;;
+;; GCC is free software; you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation; either version 3, or (at your option)
+;; any later version.
+;;
+;; GCC is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+;;
+;; You should have received a copy of the GNU General Public License
+;; along with GCC; see the file COPYING3.  If not see
+;; <http://www.gnu.org/licenses/>.
+
+; EV6 can issue 4 insns per clock.  It's out-of-order, so this isn't
+; expected to help over-much, but a precise description can be important
+; for software pipelining.
+;
+; EV6 has two symmetric pairs ("clusters") of two asymmetric integer
+; units ("upper" and "lower"), yielding pipe names U0, U1, L0, L1.
+;
+; ??? The clusters have independent register files that are re-synced
+; every cycle.  Thus there is one additional cycle of latency between
+; insns issued on different clusters.  Possibly model that by duplicating
+; all EBOX insn_reservations that can i
