@@ -6,7 +6,7 @@
 start() {
         printf "Checking hwdb..."
 	if [ ! -f /etc/udev/hwdb.bin ]; then
-		printf "Building hwdb..."
+		echo "Building hwdb..."
 		udevadm hwdb --update
 	fi
         echo "OK"
