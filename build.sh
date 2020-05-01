@@ -20,7 +20,8 @@ linux_config_file=""
 #linux opt=========================================================
 
 #linux opt=========================================================
-buildroot_dir="buildroot-2017.08"
+buildroot_dir="current"
+buildroot_ver="buildroot-2017.08"
 buildroot_config_file=""
 #linux opt=========================================================
 
@@ -106,16 +107,17 @@ pull_buildroot(){
 	rm -rf ${temp_root_dir}/buildroot
 	mkdir -p ${temp_root_dir}/buildroot
 	cd ${temp_root_dir}/buildroot
-	wget https://buildroot.org/downloads/buildroot-2017.11.1.tar.gz &&\
-	tar xvf buildroot-2017.11.1.tar.gz
-	if [ ! -d ${temp_root_dir}/buildroot/${buildroot_dir}]; then
+	
+	wget https://buildroot.org/downloads/${buildroot_ver}.tar.gz &&\
+	tar xvf ${buildroot_ver}.tar.gz
+	if [ ! -d ${temp_root_dir}/buildroot/${buildroot_ver}]; then
 		echo "Error:pull buildroot failed"
     		exit 0
 	else			
-		# mv ${temp_root_dir}/${buildroot_dir}/buildroot-2017.08/* ${temp_root_dir}/${buildroot_dir}/buildroot-2017.08
-		# rm -rf ${temp_root_dir}/${buildroot_dir}/buildroot-2017.08
 		echo "pull buildroot ok"
 	fi
+	
+	ln -s ${buildroot_ver} current
 }
 pull_all(){
         sudo apt-get update
