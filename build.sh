@@ -458,7 +458,7 @@ EOT
         sudo cp $_DTB_FILE ${temp_root_dir}/output/p1/ &&\
         sudo cp ${temp_root_dir}/output/boot.scr ${temp_root_dir}/output/p1/ &&\
         echo "--->p1 done~"
-        sudo tar xzvf $_ROOTFS_FILE -C ${temp_root_dir}/output/p2/ &&\
+        sudo tar xzf $_ROOTFS_FILE -C ${temp_root_dir}/output/p2/ &&\
         echo "--->p2 done~"
         # sudo cp -r $_OVERLAY_BASE/*  p2/ &&\
         # sudo cp -r $_OVERLAY_FILE/*  p2/ &&\
