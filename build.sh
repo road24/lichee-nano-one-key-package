@@ -21,7 +21,7 @@ linux_config_file=""
 
 #linux opt=========================================================
 buildroot_dir="current"
-buildroot_ver="buildroot-2017.08"
+buildroot_ver="buildroot-2019.08.03"
 buildroot_config_file=""
 #linux opt=========================================================
 
