@@ -26,5 +26,5 @@ Add a script nameed `post-buildroot.sh` in the parent directory.  It is passed t
     cp $1/MyAdditionalFiles/MyExecutable $OUTPUTDIR/target/usr/bin
 
 ## NOTES: 
-- Building SPI images is not tested 
+- Tested on Ubuntu 16.04 and 18.04 only
 - The script assumes you are on a x86 or x64 Linux system

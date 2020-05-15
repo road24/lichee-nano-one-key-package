@@ -21,7 +21,7 @@ linux_config_file=""
 
 #linux opt=========================================================
 buildroot_dir="current"
-buildroot_ver="buildroot-2019.08.03"
+buildroot_ver="buildroot-2019.08.3"
 buildroot_config_file=""
 #linux opt=========================================================
 
@@ -52,8 +52,8 @@ pull_linux(){
 	else
 		mv ${temp_root_dir}/${linux_dir}/linux/* ${temp_root_dir}/${linux_dir}/
 		rm -rf ${temp_root_dir}/${linux_dir}/linux
-		cp ${temp_root_dir}/suniv-f1c100s-licheepi-nano-with-lcd.dtb ${temp_root_dir}/${linux_dir}/arch/arm/boot/dts
-		echo "pull buildroot ok"
+		#JEM cp ${temp_root_dir}/suniv-f1c100s-licheepi-nano-with-lcd.dtb ${temp_root_dir}/${linux_dir}/arch/arm/boot/dts
+		echo "pull linux ok"
 	fi
 }
 pull_balena(){
@@ -107,10 +107,9 @@ pull_buildroot(){
 	rm -rf ${temp_root_dir}/buildroot
 	mkdir -p ${temp_root_dir}/buildroot
 	cd ${temp_root_dir}/buildroot
-	
 	wget https://buildroot.org/downloads/${buildroot_ver}.tar.gz &&\
 	tar xvf ${buildroot_ver}.tar.gz
-	if [ ! -d ${temp_root_dir}/buildroot/${buildroot_ver}]; then
+	if [ ! -d ${temp_root_dir}/buildroot/${buildroot_ver} ]; then
 		echo "Error:pull buildroot failed"
     		exit 0
 	else			
@@ -136,7 +135,7 @@ pull_all(){
 	cp -f ${temp_root_dir}/buildroot.config ${temp_root_dir}/buildroot/${buildroot_dir}
 	cp -f ${temp_root_dir}/linux-licheepi_nano_defconfig ${temp_root_dir}/${linux_dir}/arch/arm/configs/licheepi_nano_defconfig
 	cp -f ${temp_root_dir}/linux-licheepi_nano_spiflash_defconfig ${temp_root_dir}/${linux_dir}/arch/arm/configs/licheepi_nano_spiflash_defconfig
-	cp -f ${temp_root_dir}/linux-suniv-f1c100s.dtsi/suniv-f1c100s.dtsi
+	cp -f ${temp_root_dir}/linux-suniv-f1c100s.dtsi ${temp_root_dir}/${linux_dir}/arch/arm/boot/dts/suniv-f1c100s.dtsi
 	cp -f ${temp_root_dir}/linux-suniv-f1c100s-licheepi-nano-with-lcd.dts ${temp_root_dir}/${linux_dir}/arch/arm/boot/dts/suniv-f1c100s-licheepi-nano-with-lcd.dts
 	cp -f ${temp_root_dir}/uboot-licheepi_nano_defconfig ${temp_root_dir}/${u_boot_dir}/configs/licheepi_nano_defconfig
 	cp -f ${temp_root_dir}/uboot-licheepi_nano_spiflash_defconfig ${temp_root_dir}/${u_boot_dir}/configs/licheepi_nano_spiflash_defconfig
